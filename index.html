@@ -9,7 +9,7 @@
       color: white;
       font-family: Arial;
       text-align: center;
-      padding: 40px;
+      padding: 20px;
     }
 
     .card {
@@ -19,6 +19,13 @@
       margin-top: 20px;
     }
 
+    input {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 10px;
+      border: none;
+    }
+
     button {
       padding: 10px 20px;
       margin: 10px;
@@ -26,6 +33,7 @@
       color: white;
       border: 1px solid white;
       border-radius: 10px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -35,20 +43,77 @@
   <h1>StudyHub</h1>
   <p>Organiza. Estuda. Evolui.</p>
 
-  <div class="card">
-    <h2>Horário</h2>
-    <p>Em breve</p>
-  </div>
-
+  <!-- TESTES -->
   <div class="card">
     <h2>Testes</h2>
-    <p>Em breve</p>
+    <input id="disciplina" placeholder="Disciplina">
+    <input id="data" type="date">
+    <button onclick="addTest()">Adicionar</button>
+    <div id="listaTestes"></div>
   </div>
 
+  <!-- HORÁRIO -->
   <div class="card">
-    <h2>Aprender</h2>
-    <p>Vídeos e áudios</p>
+    <h2>Horário</h2>
+    <input id="aula" placeholder="Ex: Matemática - Segunda 10h">
+    <button onclick="addSchedule()">Adicionar</button>
+    <div id="listaHorario"></div>
   </div>
+
+<script>
+  // TESTES
+  function addTest() {
+    const disciplina = document.getElementById("disciplina").value;
+    const data = document.getElementById("data").value;
+
+    if (!disciplina || !data) return;
+
+    let testes = JSON.parse(localStorage.getItem("testes")) || [];
+    testes.push({ disciplina, data });
+    localStorage.setItem("testes", JSON.stringify(testes));
+
+    showTests();
+  }
+
+  function showTests() {
+    const lista = document.getElementById("listaTestes");
+    lista.innerHTML = "";
+
+    let testes = JSON.parse(localStorage.getItem("testes")) || [];
+
+    testes.forEach(t => {
+      lista.innerHTML += `<p>${t.disciplina} - ${t.data}</p>`;
+    });
+  }
+
+  // HORÁRIO
+  function addSchedule() {
+    const aula = document.getElementById("aula").value;
+
+    if (!aula) return;
+
+    let horario = JSON.parse(localStorage.getItem("horario")) || [];
+    horario.push(aula);
+    localStorage.setItem("horario", JSON.stringify(horario));
+
+    showSchedule();
+  }
+
+  function showSchedule() {
+    const lista = document.getElementById("listaHorario");
+    lista.innerHTML = "";
+
+    let horario = JSON.parse(localStorage.getItem("horario")) || [];
+
+    horario.forEach(a => {
+      lista.innerHTML += `<p>${a}</p>`;
+    });
+  }
+
+  // LOAD
+  showTests();
+  showSchedule();
+</script>
 
 </body>
 </html>
