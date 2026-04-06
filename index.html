@@ -1,77 +1,194 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-
-export default function StudyHub() {
-  const [page, setPage] = useState("home");
-
-  const renderPage = () => {
-    switch (page) {
-      case "home":
-        return (
-          <div className="text-center space-y-6">
-            <h1 className="text-3xl font-bold text-white">StudyHub</h1>
-            <p className="text-gray-400">Organiza. Estuda. Evolui.</p>
-            <Button onClick={() => setPage("tests")}>Ver Testes</Button>
-          </div>
-        );
-
-      case "schedule":
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl text-white">Horário</h2>
-            <Card className="bg-black/40 backdrop-blur-xl border-white/10">
-              <CardContent className="p-4 text-gray-300">
-                (Tabela de horário aqui)
-              </CardContent>
-            </Card>
-          </div>
-        );
-
-      case "tests":
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl text-white">Testes</h2>
-            <Card className="bg-black/40 backdrop-blur-xl border-white/10">
-              <CardContent className="p-4 text-gray-300">
-                (Lista de testes aqui)
-              </CardContent>
-            </Card>
-          </div>
-        );
-
-      case "learn":
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl text-white">Aprender</h2>
-            <Card className="bg-black/40 backdrop-blur-xl border-white/10">
-              <CardContent className="p-4 text-gray-300">
-                Vídeos e áudios
-              </CardContent>
-            </Card>
-          </div>
-        );
-
-      default:
-        return null;
+<!DOCTYPE html>
+<html>
+<head>
+  <title>StudyHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
     }
-  };
 
-  return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-      <div className="absolute w-40 h-40 bg-white/20 blur-3xl rounded-full"></div>
+    .glow {
+      position: fixed;
+      width: 200px;
+      height: 200px;
+      background: white;
+      filter: blur(120px);
+      opacity: 0.2;
+      top: 20%;
+      left: 40%;
+      border-radius: 50%;
+      z-index: -1;
+    }
 
-      <div className="w-full max-w-md space-y-6">
-        {renderPage()}
+    .card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 20px;
+      margin-top: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
 
-        <div className="flex justify-between mt-6">
-          <Button variant="ghost" onClick={() => setPage("home")}>Home</Button>
-          <Button variant="ghost" onClick={() => setPage("schedule")}>Horário</Button>
-          <Button variant="ghost" onClick={() => setPage("tests")}>Testes</Button>
-          <Button variant="ghost" onClick={() => setPage("learn")}>Aprender</Button>
-        </div>
-      </div>
-    </div>
-  );
-}
+    input {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
 
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background: transparent;
+      color: white;
+      border: 1px solid white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: white;
+      color: black;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+    }
+
+    td, th {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="glow"></div>
+
+<h1>StudyHub</h1>
+<p>Organiza. Estuda. Evolui.</p>
+
+<!-- TESTES -->
+<div class="card">
+  <h2>Testes</h2>
+  <input id="disciplina" placeholder="Disciplina">
+  <input id="data" type="date">
+  <button onclick="addTest()">Adicionar</button>
+  <div id="listaTestes"></div>
+</div>
+
+<!-- HORÁRIO -->
+<div class="card">
+  <h2>Horário</h2>
+
+  <input id="dia" placeholder="Dia">
+  <input id="hora" placeholder="Hora">
+  <input id="aula" placeholder="Disciplina">
+
+  <button onclick="addSchedule()">Adicionar</button>
+
+  <table id="tabelaHorario"></table>
+</div>
+
+<script>
+  // TESTES
+  function addTest() {
+    const disciplina = document.getElementById("disciplina").value;
+    const data = document.getElementById("data").value;
+
+    if (!disciplina || !data) return;
+
+    let testes = JSON.parse(localStorage.getItem("testes")) || [];
+    testes.push({ disciplina, data });
+    localStorage.setItem("testes", JSON.stringify(testes));
+
+    showTests();
+  }
+
+  function deleteTest(index) {
+    let testes = JSON.parse(localStorage.getItem("testes")) || [];
+    testes.splice(index, 1);
+    localStorage.setItem("testes", JSON.stringify(testes));
+    showTests();
+  }
+
+  function showTests() {
+    const lista = document.getElementById("listaTestes");
+    lista.innerHTML = "";
+
+    let testes = JSON.parse(localStorage.getItem("testes")) || [];
+
+    testes.forEach((t, i) => {
+      lista.innerHTML += `
+        <p>
+          ${t.disciplina} - ${t.data}
+          <button onclick="deleteTest(${i})">❌</button>
+        </p>
+      `;
+    });
+  }
+
+  // HORÁRIO
+  function addSchedule() {
+    const dia = document.getElementById("dia").value;
+    const hora = document.getElementById("hora").value;
+    const aula = document.getElementById("aula").value;
+
+    if (!dia || !hora || !aula) return;
+
+    let horario = JSON.parse(localStorage.getItem("horario")) || [];
+    horario.push({ dia, hora, aula });
+    localStorage.setItem("horario", JSON.stringify(horario));
+
+    showSchedule();
+  }
+
+  function deleteSchedule(index) {
+    let horario = JSON.parse(localStorage.getItem("horario")) || [];
+    horario.splice(index, 1);
+    localStorage.setItem("horario", JSON.stringify(horario));
+    showSchedule();
+  }
+
+  function showSchedule() {
+    const tabela = document.getElementById("tabelaHorario");
+
+    tabela.innerHTML = `
+      <tr>
+        <th>Dia</th>
+        <th>Hora</th>
+        <th>Disciplina</th>
+        <th></th>
+      </tr>
+    `;
+
+    let horario = JSON.parse(localStorage.getItem("horario")) || [];
+
+    horario.forEach((a, i) => {
+      tabela.innerHTML += `
+        <tr>
+          <td>${a.dia}</td>
+          <td>${a.hora}</td>
+          <td>${a.aula}</td>
+          <td><button onclick="deleteSchedule(${i})">❌</button></td>
+        </tr>
+      `;
+    });
+  }
+
+  showTests();
+  showSchedule();
+</script>
+
+</body>
+</html>
