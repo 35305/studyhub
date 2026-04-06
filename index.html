@@ -42,12 +42,22 @@
 
     td, th {
       border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px;
+      padding: 15px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: transparent;
+      color: white;
+      border: 1px solid white;
+      border-radius: 10px;
       cursor: pointer;
     }
 
-    td:hover {
-      background: rgba(255,255,255,0.1);
+    button:hover {
+      background: white;
+      color: black;
     }
   </style>
 </head>
@@ -61,50 +71,46 @@
 
 <div class="card">
   <h2>Horário Semanal</h2>
-  <table id="scheduleTable"></table>
+
+  <table id="scheduleTable">
+    <tr>
+      <th>Segunda</th>
+      <th>Terça</th>
+      <th>Quarta</th>
+      <th>Quinta</th>
+      <th>Sexta</th>
+    </tr>
+    <tr id="scheduleRow"></tr>
+  </table>
+
+  <button onclick="editSchedule()">Editar Horário</button>
 </div>
 
 <script>
-  const dias = ["Hora", "Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
-  const horas = ["08h", "09h", "10h", "11h", "12h", "14h", "15h", "16h"];
-
   function loadSchedule() {
-    let data = JSON.parse(localStorage.getItem("gridSchedule")) || {};
-    const table = document.getElementById("scheduleTable");
+    let data = JSON.parse(localStorage.getItem("simpleSchedule")) || ["", "", "", "", ""];
+    const row = document.getElementById("scheduleRow");
 
-    table.innerHTML = "";
+    row.innerHTML = "";
 
-    // header
-    let header = "<tr>";
-    dias.forEach(d => header += `<th>${d}</th>`);
-    header += "</tr>";
-    table.innerHTML += header;
-
-    // rows
-    horas.forEach(hora => {
-      let row = `<tr><th>${hora}</th>`;
-
-      for (let i = 1; i < dias.length; i++) {
-        let key = hora + "-" + dias[i];
-        let value = data[key] || "";
-
-        row += `<td onclick="editCell('${key}')">${value}</td>`;
-      }
-
-      row += "</tr>";
-      table.innerHTML += row;
+    data.forEach(d => {
+      row.innerHTML += `<td>${d}</td>`;
     });
   }
 
-  function editCell(key) {
-    let data = JSON.parse(localStorage.getItem("gridSchedule")) || {};
-    let novo = prompt("Disciplina:", data[key] || "");
+  function editSchedule() {
+    let data = JSON.parse(localStorage.getItem("simpleSchedule")) || ["", "", "", "", ""];
 
-    if (novo === null) return;
+    const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
 
-    data[key] = novo;
-    localStorage.setItem("gridSchedule", JSON.stringify(data));
+    for (let i = 0; i < dias.length; i++) {
+      let novo = prompt(`Disciplina para ${dias[i]}:`, data[i]);
+      if (novo !== null) {
+        data[i] = novo;
+      }
+    }
 
+    localStorage.setItem("simpleSchedule", JSON.stringify(data));
     loadSchedule();
   }
 
