@@ -1,119 +1,77 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>StudyHub</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      background: black;
-      color: white;
-      font-family: Arial;
-      text-align: center;
-      padding: 20px;
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+export default function StudyHub() {
+  const [page, setPage] = useState("home");
+
+  const renderPage = () => {
+    switch (page) {
+      case "home":
+        return (
+          <div className="text-center space-y-6">
+            <h1 className="text-3xl font-bold text-white">StudyHub</h1>
+            <p className="text-gray-400">Organiza. Estuda. Evolui.</p>
+            <Button onClick={() => setPage("tests")}>Ver Testes</Button>
+          </div>
+        );
+
+      case "schedule":
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl text-white">Horário</h2>
+            <Card className="bg-black/40 backdrop-blur-xl border-white/10">
+              <CardContent className="p-4 text-gray-300">
+                (Tabela de horário aqui)
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case "tests":
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl text-white">Testes</h2>
+            <Card className="bg-black/40 backdrop-blur-xl border-white/10">
+              <CardContent className="p-4 text-gray-300">
+                (Lista de testes aqui)
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case "learn":
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl text-white">Aprender</h2>
+            <Card className="bg-black/40 backdrop-blur-xl border-white/10">
+              <CardContent className="p-4 text-gray-300">
+                Vídeos e áudios
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      default:
+        return null;
     }
+  };
 
-    .card {
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 20px;
-      margin-top: 20px;
-    }
+  return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+      <div className="absolute w-40 h-40 bg-white/20 blur-3xl rounded-full"></div>
 
-    input {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 10px;
-      border: none;
-    }
+      <div className="w-full max-w-md space-y-6">
+        {renderPage()}
 
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      background: black;
-      color: white;
-      border: 1px solid white;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-  </style>
-</head>
+        <div className="flex justify-between mt-6">
+          <Button variant="ghost" onClick={() => setPage("home")}>Home</Button>
+          <Button variant="ghost" onClick={() => setPage("schedule")}>Horário</Button>
+          <Button variant="ghost" onClick={() => setPage("tests")}>Testes</Button>
+          <Button variant="ghost" onClick={() => setPage("learn")}>Aprender</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-<body>
-
-  <h1>StudyHub</h1>
-  <p>Organiza. Estuda. Evolui.</p>
-
-  <!-- TESTES -->
-  <div class="card">
-    <h2>Testes</h2>
-    <input id="disciplina" placeholder="Disciplina">
-    <input id="data" type="date">
-    <button onclick="addTest()">Adicionar</button>
-    <div id="listaTestes"></div>
-  </div>
-
-  <!-- HORÁRIO -->
-  <div class="card">
-    <h2>Horário</h2>
-    <input id="aula" placeholder="Ex: Matemática - Segunda 10h">
-    <button onclick="addSchedule()">Adicionar</button>
-    <div id="listaHorario"></div>
-  </div>
-
-<script>
-  // TESTES
-  function addTest() {
-    const disciplina = document.getElementById("disciplina").value;
-    const data = document.getElementById("data").value;
-
-    if (!disciplina || !data) return;
-
-    let testes = JSON.parse(localStorage.getItem("testes")) || [];
-    testes.push({ disciplina, data });
-    localStorage.setItem("testes", JSON.stringify(testes));
-
-    showTests();
-  }
-
-  function showTests() {
-    const lista = document.getElementById("listaTestes");
-    lista.innerHTML = "";
-
-    let testes = JSON.parse(localStorage.getItem("testes")) || [];
-
-    testes.forEach(t => {
-      lista.innerHTML += `<p>${t.disciplina} - ${t.data}</p>`;
-    });
-  }
-
-  // HORÁRIO
-  function addSchedule() {
-    const aula = document.getElementById("aula").value;
-
-    if (!aula) return;
-
-    let horario = JSON.parse(localStorage.getItem("horario")) || [];
-    horario.push(aula);
-    localStorage.setItem("horario", JSON.stringify(horario));
-
-    showSchedule();
-  }
-
-  function showSchedule() {
-    const lista = document.getElementById("listaHorario");
-    lista.innerHTML = "";
-
-    let horario = JSON.parse(localStorage.getItem("horario")) || [];
-
-    horario.forEach(a => {
-      lista.innerHTML += `<p>${a}</p>`;
-    });
-  }
-
-  // LOAD
-  showTests();
-  showSchedule();
-</script>
-
-</body>
-</html>
