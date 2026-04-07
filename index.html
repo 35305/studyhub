@@ -4,41 +4,80 @@
   <title>StudyHub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { background: black; color: white; font-family: arial; text-align: center; padding: 20px; }
+    body { margin:0; background:black; color:white; font-family:Arial; display:flex; }
 
-    .card {
+    /* SIDEBAR */
+    .sidebar {
+      width: 200px;
       background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
       padding: 20px;
-      border-radius: 20px;
-      margin-top: 20px;
-      border: 1px solid rgba(255,255,255,0.1);
+      height: 100vh;
+      border-right: 1px solid rgba(255,255,255,0.1);
     }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    td, th { border: 1px solid rgba(255,255,255,0.2); padding: 10px; }
+    .sidebar button {
+      display:block;
+      width:100%;
+      margin:10px 0;
+      padding:10px;
+      background:transparent;
+      color:white;
+      border:1px solid white;
+      border-radius:10px;
+      cursor:pointer;
+    }
 
-    td { cursor: pointer; }
-    td:hover { background: rgba(255,255,255,0.1); }
+    .sidebar button:hover {
+      background:white;
+      color:black;
+    }
 
-    input { padding: 8px; margin: 5px; border-radius: 10px; border: none; }
-    button { padding: 10px; margin: 5px; border-radius: 10px; border: 1px solid white; background: transparent; color: white; cursor: pointer; }
+    /* MAIN */
+    .main {
+      flex:1;
+      padding:20px;
+    }
+
+    .section { display:none; }
+    .active { display:block; }
+
+    table { width:100%; border-collapse:collapse; }
+    td, th { border:1px solid rgba(255,255,255,0.2); padding:10px; cursor:pointer; }
+
+    input { padding:8px; margin:5px; border-radius:10px; border:none; }
+    button { padding:8px; margin:5px; border-radius:10px; border:1px solid white; background:transparent; color:white; }
   </style>
 </head>
 
 <body>
 
-<h1>StudyHub</h1>
-<p>Disciplina constrói caminhos, organização abre portas e o estudo transforma quem tu escolhes ser todos os dias.</p>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>StudyHub</h2>
+  <button onclick="showSection('home')">Home</button>
+  <button onclick="showSection('schedule')">Horário</button>
+  <button onclick="showSection('tests')">Testes</button>
+  <button onclick="showSection('videos')">Vídeos</button>
+  <button onclick="showSection('ia')">IA</button>
+</div>
 
-<!-- HORÁRIO COMPLETO -->
-<div class="card">
+<!-- MAIN -->
+<div class="main">
+
+<!-- HOME -->
+<div id="home" class="section active">
+  <h1>Bem-vindo ao StudyHub</h1>
+  <p>Organiza. Estuda. Evolui.</p>
+</div>
+
+<!-- HORÁRIO -->
+<div id="schedule" class="section">
   <h2>Horário</h2>
-  <table id="schedule"></table>
+  <table id="scheduleTable"></table>
 </div>
 
 <!-- TESTES -->
-<div class="card">
+<div id="tests" class="section">
   <h2>Testes</h2>
   <input id="disciplina" placeholder="Disciplina">
   <input id="data" type="date">
@@ -46,164 +85,129 @@
   <div id="listaTestes"></div>
 </div>
 
-<script>
-const dias = ["Hora","Seg","Ter","Qua","Qui","Sex"];
-const horas = ["08:20 - 9:10","9:15 - 10:5","10:20 - 11:10","11:20 - 12:10","12:15 - 13:05","13:05 - 14:15","14:15 - 15:05","15:20 - 16:10","16:20 - 17:10","17:15 - 18:05"];
-
-function loadSchedule(){
-  let data = JSON.parse(localStorage.getItem("schedule")) || {};
-  let table = document.getElementById("schedule");
-  table.innerHTML = "";
-
-  let header = "<tr>";
-  dias.forEach(d=> header += `<th>${d}</th>`);
-  header += "</tr>";
-  table.innerHTML += header;
-
-  horas.forEach(h=>{
-    let row = `<tr><th>${h}</th>`;
-    for(let i=1;i<dias.length;i++){
-      let key = h+"-"+dias[i];
-      let val = data[key] || "";
-      row += `<td onclick="editCell('${key}')">${val}</td>`;
-    }
-    row += "</tr>";
-    table.innerHTML += row;
-  });
-}
-
-function editCell(key){
-  let data = JSON.parse(localStorage.getItem("schedule")) || {};
-  let novo = prompt("Disciplina:", data[key] || "");
-  if(novo===null) return;
-  data[key] = novo;
-  localStorage.setItem("schedule", JSON.stringify(data));
-  loadSchedule();
-}
-
-// TESTES
-function addTest(){
-  let d = document.getElementById("disciplina").value;
-  let data = document.getElementById("data").value;
-  if(!d || !data) return;
-
-  let testes = JSON.parse(localStorage.getItem("testes")) || [];
-  testes.push({d,data});
-  localStorage.setItem("testes", JSON.stringify(testes));
-  showTests();
-}
-
-function deleteTest(i){
-  let testes = JSON.parse(localStorage.getItem("testes")) || [];
-  testes.splice(i,1);
-  localStorage.setItem("testes", JSON.stringify(testes));
-  showTests();
-}
-
-function showTests(){
-  let lista = document.getElementById("listaTestes");
-  lista.innerHTML = "";
-  let testes = JSON.parse(localStorage.getItem("testes")) || [];
-
-  let hoje = new Date();
-
-  testes.forEach((t,i)=>{
-    let dataTeste = new Date(t.data);
-    let diff = Math.ceil((dataTeste-hoje)/(1000*60*60*24));
-    let texto = diff>=0 ? diff+" dias" : "passado";
-
-    lista.innerHTML += `<p>${t.d} - ${t.data} (${texto}) <button onclick="deleteTest(${i})">❌</button></p>`;
-  });
-}
-
-loadSchedule();
-showTests();
-</script>
-
-
-
 <!-- VIDEOS -->
-<div class="card">
-  <h2>Aprender (Vídeos)</h2>
-  <input id="videoLink" placeholder="Link do YouTube">
+<div id="videos" class="section">
+  <h2>Vídeos</h2>
+  <input id="videoLink" placeholder="Link">
   <button onclick="addVideo()">Adicionar</button>
   <div id="listaVideos"></div>
 </div>
 
-<script>
-// VIDEOS
-function addVideo(){
-  let link = document.getElementById("videoLink").value;
-  if(!link) return;
-
-  let videos = JSON.parse(localStorage.getItem("videos")) || [];
-  videos.push(link);
-  localStorage.setItem("videos", JSON.stringify(videos));
-
-  showVideos();
-}
-
-function deleteVideo(i){
-  let videos = JSON.parse(localStorage.getItem("videos")) || [];
-  videos.splice(i,1);
-  localStorage.setItem("videos", JSON.stringify(videos));
-  showVideos();
-}
-
-function showVideos(){
-  let lista = document.getElementById("listaVideos");
-  lista.innerHTML = "";
-
-  let videos = JSON.parse(localStorage.getItem("videos")) || [];
-
-  videos.forEach((v,i)=>{
-    lista.innerHTML += `
-      <p>
-        <a href="${v}" target="_blank">Ver vídeo</a>
-        <button onclick="deleteVideo(${i})">❌</button>
-      </p>
-    `;
-  });
-}
-
-showVideos();
-</script>
-
-
-<!-- IA (FOTOS) -->
-<div class="card">
-  <h2>IA Study (Fotos)</h2>
+<!-- IA -->
+<div id="ia" class="section">
+  <h2>IA (Fotos)</h2>
   <input type="file" id="imageInput" accept="image/*">
   <button onclick="analyzeImage()">Analisar</button>
   <p id="iaOutput"></p>
 </div>
 
+</div>
+
 <script>
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// HORÁRIO
+const dias=["Hora","Seg","Ter","Qua","Qui","Sex"];
+const horas=["08h","09h","10h","11h","12h","13h","14h","15h","16h","17h","18h"];
+
+function loadSchedule(){
+  let data=JSON.parse(localStorage.getItem("schedule"))||{};
+  let table=document.getElementById("scheduleTable");
+  table.innerHTML="";
+
+  let header="<tr>";
+  dias.forEach(d=>header+=`<th>${d}</th>`);
+  header+="</tr>";
+  table.innerHTML+=header;
+
+  horas.forEach(h=>{
+    let row=`<tr><th>${h}</th>`;
+    for(let i=1;i<dias.length;i++){
+      let key=h+"-"+dias[i];
+      let val=data[key]||"";
+      row+=`<td onclick="editCell('${key}')">${val}</td>`;
+    }
+    row+="</tr>";
+    table.innerHTML+=row;
+  });
+}
+
+function editCell(key){
+  let data=JSON.parse(localStorage.getItem("schedule"))||{};
+  let novo=prompt("Disciplina:",data[key]||"");
+  if(novo===null) return;
+  data[key]=novo;
+  localStorage.setItem("schedule",JSON.stringify(data));
+  loadSchedule();
+}
+
+// TESTES
+function addTest(){
+  let d=document.getElementById("disciplina").value;
+  let data=document.getElementById("data").value;
+  if(!d||!data) return;
+
+  let testes=JSON.parse(localStorage.getItem("testes"))||[];
+  testes.push({d,data});
+  localStorage.setItem("testes",JSON.stringify(testes));
+  showTests();
+}
+
+function showTests(){
+  let lista=document.getElementById("listaTestes");
+  lista.innerHTML="";
+  let testes=JSON.parse(localStorage.getItem("testes"))||[];
+
+  let hoje=new Date();
+
+  testes.forEach((t,i)=>{
+    let diff=Math.ceil((new Date(t.data)-hoje)/(1000*60*60*24));
+    lista.innerHTML+=`<p>${t.d} - ${t.data} (${diff} dias)</p>`;
+  });
+}
+
+// VIDEOS
+function addVideo(){
+  let link=document.getElementById("videoLink").value;
+  if(!link) return;
+
+  let videos=JSON.parse(localStorage.getItem("videos"))||[];
+  videos.push(link);
+  localStorage.setItem("videos",JSON.stringify(videos));
+  showVideos();
+}
+
+function showVideos(){
+  let lista=document.getElementById("listaVideos");
+  lista.innerHTML="";
+  let videos=JSON.parse(localStorage.getItem("videos"))||[];
+
+  videos.forEach(v=>{
+    lista.innerHTML+=`<p><a href="${v}" target="_blank">Ver vídeo</a></p>`;
+  });
+}
+
+// IA (simulada)
 function analyzeImage(){
-  const file = document.getElementById("imageInput").files[0];
-  const output = document.getElementById("iaOutput");
+  let file=document.getElementById("imageInput").files[0];
+  let out=document.getElementById("iaOutput");
 
-  if(!file){
-    output.innerText = "Escolhe uma imagem primeiro.";
-    return;
-  }
+  if(!file){ out.innerText="Escolhe imagem"; return; }
 
-  // Simulação de IA (placeholder)
-  output.innerText = "A analisar imagem...";
+  out.innerText="A analisar...";
 
   setTimeout(()=>{
-    output.innerText = "📘 Conteúdo identificado: (simulação)
-
-Resumo:
-- Tema principal detectado
-- Pontos importantes extraídos
-
-Pergunta exemplo:
-O que aprendeste sobre este tema?";
-  }, 2000);
+    out.innerText="Resumo: conteúdo identificado (simulação)";
+  },1500);
 }
+
+loadSchedule();
+showTests();
+showVideos();
 </script>
 
 </body>
-</html>
 </html>
