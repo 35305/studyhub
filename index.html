@@ -58,6 +58,8 @@
 <!-- SIDEBAR -->
 <div class="sidebar">
   <h2>StudyHub</h2>
+  
+  <button onclick="showSection('home')">Home</button>
   <button onclick="showSection('schedule')">Horário</button>
   <button onclick="showSection('tests')">Testes</button>
   <button onclick="showSection('videos')">Vídeos</button>
@@ -68,12 +70,16 @@
 <div class="main">
 
 <!-- HORÁRIO -->
-<div id="schedule" class="section active">
+<div id="schedule" class="section">
   <h2>Horário</h2>
   <table id="scheduleTable"></table>
 </div>
 
 <!-- TESTES -->
+<div id="home" class="section active">
+  <h1>StudyHub</h1>
+  <p>Bem-vindo! Usa o menu à esquerda.</p>
+</div>
 <div id="tests" class="section">
   <h2>Testes</h2>
   <input id="disciplina" placeholder="Disciplina">
@@ -159,11 +165,19 @@ function showTests(){
   lista.innerHTML="";
   let testes=JSON.parse(localStorage.getItem("testes"))||[];
 
+  let hoje = new Date();
+
   testes.forEach(t=>{
-    lista.innerHTML+=`<p>${t.d} - ${t.data}</p>`;
+    let dataTeste = new Date(t.data);
+    let diff = Math.ceil((dataTeste-hoje)/(1000*60*60*24));
+
+    let texto = diff > 0 ? diff + " dias" :
+                 diff === 0 ? "hoje" :
+                 "passado";
+
+    lista.innerHTML+=`<p>${t.d} - ${t.data} (${texto})</p>`;
   });
 }
-
 // VIDEOS
 function addVideo(){
   let link=document.getElementById("videoLink").value;
@@ -220,10 +234,18 @@ function analyzeImage(){
 
   Array.from(files).forEach((file, index) => {
 
-    Tesseract.recognize(file, 'por+eng')
-    .then(({ data: { text } }) => {
+   Tesseract.recognize(file, 'por+eng', {
+  logger: m => console.log(m)
+})
 
-      let textoLimpo = limparTexto(text);
+     function limparTexto(texto){
+  let limpo = texto
+    .replace(/[^a-zA-ZÀ-ÿ0-9.,!? \n]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2"); // separa palavras coladas
+
+  return limpo.trim();
+}
       let resumo = gerarResumo(textoLimpo);
 
       resultados += `
