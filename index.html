@@ -48,7 +48,7 @@
 
 <script>
 const dias = ["Hora","Seg","Ter","Qua","Qui","Sex"];
-const horas = ["08:20 - 9:10","9:15 - 10:5","","10:20 - 11:10","11:20 - 12:10","12:15 - 13:05","13:05 - 14:15","14:15 - 15:05","15:20 - 16:10","16:20 - 17:10","17:15 - 18:05"];
+const horas = ["08:20 - 9:10","9:15 - 10:5","10:20 - 11:10","11:20 - 12:10","12:15 - 13:05","13:05 - 14:15","14:15 - 15:05","15:20 - 16:10","16:20 - 17:10","17:15 - 18:05"];
 
 function loadSchedule(){
   let data = JSON.parse(localStorage.getItem("schedule")) || {};
@@ -168,7 +168,40 @@ function showVideos(){
 showVideos();
 </script>
 
+<!-- IA (FOTOS) -->
+<div class="card">
+  <h2>IA Study (Fotos)</h2>
+  <input type="file" id="imageInput" accept="image/*">
+  <button onclick="analyzeImage()">Analisar</button>
+  <p id="iaOutput"></p>
+</div>
+
+<script>
+function analyzeImage(){
+  const file = document.getElementById("imageInput").files[0];
+  const output = document.getElementById("iaOutput");
+
+  if(!file){
+    output.innerText = "Escolhe uma imagem primeiro.";
+    return;
+  }
+  
+  // Simulação de IA (placeholder)
+  output.innerText = "A analisar imagem...";
+
+  setTimeout(()=>{
+    output.innerText = "📘 Conteúdo identificado: (simulação)
+
+Resumo:
+- Tema principal detectado
+- Pontos importantes extraídos
+
+Pergunta exemplo:
+O que aprendeste sobre este tema?";
+  }, 2000);
+}
+</script>
+
 </body>
 </html>
 </html>
-
