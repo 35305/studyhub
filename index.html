@@ -69,18 +69,20 @@
 <!-- MAIN -->
 <div class="main">
 
+<!-- HOME -->
+<div id="home" class="section active">
+  <h1>StudyHub</h1>
+  <p>Bem-vindo! Usa o menu.</p>
+</div>
+
 <!-- HORÁRIO -->
-<div id="schedule" class="section active">
+<div id="schedule" class="section">
   <h2>Horário</h2>
   <table id="scheduleTable"></table>
 </div>
 
 <!-- TESTES -->
-<div id="home" class="section active">
-  <h1>StudyHub</h1>
-  <p>Bem-vindo! Usa o menu à esquerda.</p>
-</div>
-<div id="tests" class="section active">
+<div id="tests" class="section">
   <h2>Testes</h2>
   <input id="disciplina" placeholder="Disciplina">
   <input id="data" type="date">
@@ -89,7 +91,7 @@
 </div>
 
 <!-- VIDEOS -->
-<div id="videos" class="section active">
+<div id="videos" class="section">
   <h2>Vídeos</h2>
   <input id="videoLink" placeholder="Link">
   <button onclick="addVideo()">Adicionar</button>
@@ -97,13 +99,11 @@
 </div>
 
 <!-- IA -->
-<div id="ia" class="section active">
+<div id="ia" class="section">
   <h2>IA (Fotos)</h2>
   <input type="file" id="imageInput" accept="image/*" multiple>
   <button onclick="analyzeImage()">Analisar</button>
   <pre id="iaOutput"></pre>
-</div>
-
 </div>
 
 <script>
