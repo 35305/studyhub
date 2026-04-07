@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <title>StudyHub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { margin:0; background:black; color:white; font-family:Arial; display:flex; }
 
-    /* SIDEBAR */
+  <!-- TESSERACT (IA REAL) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <style>
+    body {
+      margin:0;
+      background:black;
+      color:white;
+      font-family:Arial;
+      display:flex;
+    }
+
     .sidebar {
-      width: 200px;
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      height: 100vh;
-      border-right: 1px solid rgba(255,255,255,0.1);
+      width:200px;
+      padding:20px;
+      background:rgba(255,255,255,0.05);
     }
 
     .sidebar button {
@@ -21,19 +27,12 @@
       width:100%;
       margin:10px 0;
       padding:10px;
+      border-radius:10px;
+      border:1px solid white;
       background:transparent;
       color:white;
-      border:1px solid white;
-      border-radius:10px;
-      cursor:pointer;
     }
 
-    .sidebar button:hover {
-      background:white;
-      color:black;
-    }
-
-    /* MAIN */
     .main {
       flex:1;
       padding:20px;
@@ -42,11 +41,15 @@
     .section { display:none; }
     .active { display:block; }
 
-    table { width:100%; border-collapse:collapse; }
-    td, th { border:1px solid rgba(255,255,255,0.2); padding:10px; cursor:pointer; }
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
 
-    input { padding:8px; margin:5px; border-radius:10px; border:none; }
-    button { padding:8px; margin:5px; border-radius:10px; border:1px solid white; background:transparent; color:white; }
+    td, th {
+      border:1px solid rgba(255,255,255,0.2);
+      padding:10px;
+    }
   </style>
 </head>
 
@@ -55,7 +58,6 @@
 <!-- SIDEBAR -->
 <div class="sidebar">
   <h2>StudyHub</h2>
-  <button onclick="showSection('home')">Home</button>
   <button onclick="showSection('schedule')">Horário</button>
   <button onclick="showSection('tests')">Testes</button>
   <button onclick="showSection('videos')">Vídeos</button>
@@ -65,14 +67,8 @@
 <!-- MAIN -->
 <div class="main">
 
-<!-- HOME -->
-<div id="home" class="section active">
-  <h1>Bem-vindo ao StudyHub</h1>
-  <p>Organiza. Estuda. Evolui.</p>
-</div>
-
 <!-- HORÁRIO -->
-<div id="schedule" class="section">
+<div id="schedule" class="section active">
   <h2>Horário</h2>
   <table id="scheduleTable"></table>
 </div>
@@ -97,22 +93,24 @@
 <!-- IA -->
 <div id="ia" class="section">
   <h2>IA (Fotos)</h2>
-  <input type="file" id="imageInput" accept="image/*">
+  <input type="file" id="imageInput" accept="image/*" multiple>
   <button onclick="analyzeImage()">Analisar</button>
-  <p id="iaOutput"></p>
+  <pre id="iaOutput"></pre>
 </div>
 
 </div>
 
 <script>
+
+// NAV
 function showSection(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
 // HORÁRIO
-const dias=["Hora","Segunda","Terça","Quarta","Quinta","Sexta"];
-const horas=[["08:20 - 09:10","09:15 - 10:5","10:20 - 11:10","11:20 - 12:10","12:15 - 13:05","13:05 - 14:15","14:15 - 15:05","15:20 - 16:10","16:20 - 17:10","17:15 - 18:05"];
+const dias=["Hora","Seg","Ter","Qua","Qui","Sex"];
+const horas=["08h","09h","10h","11h","12h","13h","14h","15h","16h","17h","18h"];
 
 function loadSchedule(){
   let data=JSON.parse(localStorage.getItem("schedule"))||{};
@@ -149,7 +147,6 @@ function editCell(key){
 function addTest(){
   let d=document.getElementById("disciplina").value;
   let data=document.getElementById("data").value;
-  if(!d||!data) return;
 
   let testes=JSON.parse(localStorage.getItem("testes"))||[];
   testes.push({d,data});
@@ -162,18 +159,14 @@ function showTests(){
   lista.innerHTML="";
   let testes=JSON.parse(localStorage.getItem("testes"))||[];
 
-  let hoje=new Date();
-
-  testes.forEach((t,i)=>{
-    let diff=Math.ceil((new Date(t.data)-hoje)/(1000*60*60*24));
-    lista.innerHTML+=`<p>${t.d} - ${t.data} (${diff} dias)</p>`;
+  testes.forEach(t=>{
+    lista.innerHTML+=`<p>${t.d} - ${t.data}</p>`;
   });
 }
 
 // VIDEOS
 function addVideo(){
   let link=document.getElementById("videoLink").value;
-  if(!link) return;
 
   let videos=JSON.parse(localStorage.getItem("videos"))||[];
   videos.push(link);
@@ -191,7 +184,27 @@ function showVideos(){
   });
 }
 
-// IA (simulada)
+// IA
+
+function limparTexto(texto){
+  let limpo = texto.replace(/[^a-zA-ZÀ-ÿ0-9.,!? \n]/g, " ");
+  limpo = limpo.replace(/\s+/g, " ");
+  return limpo.trim();
+}
+
+function gerarResumo(texto){
+  let frases = texto.split(/[.!?]/);
+  return frases.slice(0,3).join(". ") + ".";
+}
+
+function gerarPerguntas(){
+  return `
+- Qual é o tema principal?
+- Resume o conteúdo.
+- Explica por palavras tuas.
+`;
+}
+
 function analyzeImage(){
   let files = document.getElementById("imageInput").files;
   let out = document.getElementById("iaOutput");
@@ -201,7 +214,7 @@ function analyzeImage(){
     return;
   }
 
-  out.innerText = "🔍 A analisar imagem...";
+  out.innerText = "🔍 A analisar...";
 
   let resultados = "";
 
@@ -212,10 +225,9 @@ function analyzeImage(){
 
       let textoLimpo = limparTexto(text);
       let resumo = gerarResumo(textoLimpo);
-      let perguntas = gerarPerguntas(textoLimpo);
 
       resultados += `
-📸 IMAGEM ${index + 1}
+📸 IMAGEM ${index+1}
 
 📖 TEXTO:
 ${textoLimpo.substring(0,300)}...
@@ -224,24 +236,22 @@ ${textoLimpo.substring(0,300)}...
 ${resumo}
 
 ❓ PERGUNTAS:
-${perguntas}
+${gerarPerguntas()}
 
--------------------------
+---------------------
 `;
 
       out.innerText = resultados;
-
-    })
-    .catch(() => {
-      out.innerText = "Erro ao analisar imagem.";
     });
 
   });
 }
 
+// INIT
 loadSchedule();
 showTests();
 showVideos();
+
 </script>
 
 </body>
