@@ -4,7 +4,7 @@
   <title>StudyHub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { background: black; color: white; font-family: Arial; text-align: center; padding: 20px; }
+    body { background: black and blue; color: white; font-family: Weekend Mood; text-align: center; padding: 20px; }
 
     .card {
       background: rgba(255,255,255,0.05);
@@ -29,7 +29,7 @@
 <body>
 
 <h1>StudyHub</h1>
-<p>Organiza. Estuda. Evolui.</p>
+<p>Disciplina constrói caminhos, organização abre portas e o estudo transforma quem tu escolhes ser todos os dias.</p>
 
 <!-- HORÁRIO COMPLETO -->
 <div class="card">
@@ -48,7 +48,7 @@
 
 <script>
 const dias = ["Hora","Seg","Ter","Qua","Qui","Sex"];
-const horas = ["08h","09h","10h","11h","12h","14h","15h","16h"];
+const horas = ["08:20 - 9:10","9:15 - 10:5","","10:20 - 11:10","11:20 - 12:10","12:15 - 13:05","13:05 - 14:15","14:15 - 15:05","15:20 - 16:10","16:20 - 17:10","17:15 - 18:05"];
 
 function loadSchedule(){
   let data = JSON.parse(localStorage.getItem("schedule")) || {};
@@ -120,5 +120,55 @@ loadSchedule();
 showTests();
 </script>
 
+
+<!-- VIDEOS -->
+<div class="card">
+  <h2>Aprender (Vídeos)</h2>
+  <input id="videoLink" placeholder="Link do YouTube">
+  <button onclick="addVideo()">Adicionar</button>
+  <div id="listaVideos"></div>
+</div>
+
+<script>
+// VIDEOS
+function addVideo(){
+  let link = document.getElementById("videoLink").value;
+  if(!link) return;
+
+  let videos = JSON.parse(localStorage.getItem("videos")) || [];
+  videos.push(link);
+  localStorage.setItem("videos", JSON.stringify(videos));
+
+  showVideos();
+}
+
+function deleteVideo(i){
+  let videos = JSON.parse(localStorage.getItem("videos")) || [];
+  videos.splice(i,1);
+  localStorage.setItem("videos", JSON.stringify(videos));
+  showVideos();
+}
+
+function showVideos(){
+  let lista = document.getElementById("listaVideos");
+  lista.innerHTML = "";
+
+  let videos = JSON.parse(localStorage.getItem("videos")) || [];
+
+  videos.forEach((v,i)=>{
+    lista.innerHTML += `
+      <p>
+        <a href="${v}" target="_blank">Ver vídeo</a>
+        <button onclick="deleteVideo(${i})">❌</button>
+      </p>
+    `;
+  });
+}
+
+showVideos();
+</script>
+
 </body>
 </html>
+</html>
+
