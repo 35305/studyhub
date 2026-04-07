@@ -7,124 +7,128 @@
 
   <!-- Tesseract OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- Transformers GPT-2 -->
+  <script type="module">
+    import { pipeline } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.7.0/dist/transformers.min.js";
+    window.gptPipeline = await pipeline("text-generation", "Xenova/gpt2");
+  </script>
 
   <style>
     body {
-      margin:0;
-      background:black;
-      color:white;
-      font-family:Arial;
-      display:flex;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      display: flex;
+      min-height: 100vh;
     }
 
     .sidebar {
-      width:200px;
-      padding:20px;
-      background:rgba(255,255,255,0.05);
+      width: 220px;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      box-sizing: border-box;
     }
 
+    .sidebar h2 { margin-top: 0; font-size: 24px; }
     .sidebar button {
-      display:block;
-      width:100%;
-      margin:10px 0;
-      padding:10px;
-      border-radius:10px;
-      border:1px solid white;
-      background:transparent;
-      color:white;
-      cursor:pointer;
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid white;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
     }
+    .sidebar button:hover { background: rgba(255,255,255,0.1); }
 
     .main {
-      flex:1;
-      padding:20px;
-      overflow-y:auto;
-      max-height:100vh;
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      box-sizing: border-box;
     }
 
-    .section { display:none; }
-    .active { display:block; }
+    .section { display: none; }
+    .active { display: block; }
 
     table {
-      width:100%;
-      border-collapse:collapse;
+      width: 100%;
+      border-collapse: collapse;
     }
 
-    td, th {
-      border:1px solid rgba(255,255,255,0.2);
-      padding:10px;
+    th, td {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
     }
+    td:hover { background: rgba(255,255,255,0.1); }
 
-    input, button {
-      margin:5px 0;
-    }
-
-    a { color:#0af; text-decoration:none; }
+    input, button { margin: 5px 0; padding: 6px; }
+    a { color: #0af; text-decoration: none; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <h2>StudyHub</h2>
-  <button onclick="showSection('home')">Home</button>
-  <button onclick="showSection('schedule')">Horário</button>
-  <button onclick="showSection('tests')">Testes</button>
-  <button onclick="showSection('videos')">Vídeos</button>
-  <button onclick="showSection('ia')">IA</button>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- HOME -->
-  <div id="home" class="section active">
-    <h1>StudyHub</h1>
-    <p>Bem-vindo! Usa o menu para navegar.</p>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>StudyHub</h2>
+    <button onclick="showSection('home')">Home</button>
+    <button onclick="showSection('schedule')">Horário</button>
+    <button onclick="showSection('tests')">Testes</button>
+    <button onclick="showSection('videos')">Vídeos</button>
+    <button onclick="showSection('ia')">IA</button>
   </div>
 
-  <!-- HORÁRIO -->
-  <div id="schedule" class="section">
-    <h2>Horário</h2>
-    <table id="scheduleTable"></table>
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- HOME -->
+    <div id="home" class="section active">
+      <h1>StudyHub</h1>
+      <p>Bem-vindo! Use o menu lateral para navegar.</p>
+    </div>
+
+    <!-- HORÁRIO -->
+    <div id="schedule" class="section">
+      <h2>Horário</h2>
+      <table id="scheduleTable"></table>
+    </div>
+
+    <!-- TESTES -->
+    <div id="tests" class="section">
+      <h2>Testes</h2>
+      <input id="disciplinaInput" placeholder="Disciplina">
+      <input id="dataInput" type="date">
+      <button onclick="addTest()">Adicionar</button>
+      <div id="listaTestes"></div>
+    </div>
+
+    <!-- VÍDEOS -->
+    <div id="videos" class="section">
+      <h2>Vídeos</h2>
+      <input id="videoLinkInput" placeholder="Link do vídeo">
+      <button onclick="addVideo()">Adicionar</button>
+      <div id="listaVideos"></div>
+    </div>
+
+    <!-- IA -->
+    <div id="ia" class="section">
+      <h2>IA (Fotos)</h2>
+      <input type="file" id="imageInput" accept="image/*" multiple>
+      <button onclick="analyzeImage()">Analisar</button>
+      <pre id="iaOutput"></pre>
+    </div>
+
   </div>
 
-  <!-- TESTES -->
-  <div id="tests" class="section">
-    <h2>Testes</h2>
-    <input id="disciplinaInput" placeholder="Disciplina">
-    <input id="dataInput" type="date">
-    <button onclick="addTest()">Adicionar</button>
-    <div id="listaTestes"></div>
-  </div>
-
-  <!-- VÍDEOS -->
-  <div id="videos" class="section">
-    <h2>Vídeos</h2>
-    <input id="videoLinkInput" placeholder="Link do vídeo">
-    <button onclick="addVideo()">Adicionar</button>
-    <div id="listaVideos"></div>
-  </div>
-
-  <!-- IA -->
-  <div id="ia" class="section">
-    <h2>IA (Fotos)</h2>
-    <input type="file" id="imageInput" accept="image/*" multiple>
-    <button onclick="analyzeImage()">Analisar</button>
-    <pre id="iaOutput"></pre>
-  </div>
-
-</div>
-
-<!-- JAVASCRIPT -->
-<script type="module">
-  // Transformers.js import
-  import { pipeline } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.7.0/dist/transformers.min.js";
-
-  // Criar pipeline GPT-2
-  const pipe = await pipeline("text-generation", "Xenova/gpt2");
-
+<script>
   // ---------- NAV ----------
   function showSection(id){
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -132,131 +136,180 @@
   }
 
   // ---------- HORÁRIO ----------
-  const dias=["Hora","Seg","Ter","Qua","Qui","Sex"];
-  const horas=["08h","09h","10h","11h","12h","13h","14h","15h","16h","17h","18h"];
+  const dias = ["Hora","Seg","Ter","Qua","Qui","Sex"];
+  const horas = ["08h","09h","10h","11h","12h","13h","14h","15h","16h","17h","18h"];
 
   function loadSchedule(){
-    let data=JSON.parse(localStorage.getItem("schedule"))||{};
-    let table=document.getElementById("scheduleTable");
-    table.innerHTML="";
+    let data = JSON.parse(localStorage.getItem("schedule")) || {};
+    let table = document.getElementById("scheduleTable");
+    table.innerHTML = "";
 
-    let header="<tr>";
-    dias.forEach(d=>header+=`<th>${d}</th>`);
-    header+="</tr>";
-    table.innerHTML+=header;
+    // Cabeçalho
+    let header = "<tr>";
+    dias.forEach(d => header += `<th>${d}</th>`);
+    header += "</tr>";
+    table.innerHTML += header;
 
-    horas.forEach(h=>{
-      let row=`<tr><th>${h}</th>`;
-      for(let i=1;i<dias.length;i++){
-        let key=h+"-"+dias[i];
-        let val=data[key]||"";
-        row+=`<td onclick="editCell('${key}')">${val}</td>`;
+    horas.forEach(h => {
+      let row = `<tr><th>${h}</th>`;
+      for(let i=1; i<dias.length; i++){
+        let key = h + "-" + dias[i];
+        let val = data[key] || "";
+        row += `<td onclick="editCell('${key}')">${val}</td>`;
       }
-      row+="</tr>";
-      table.innerHTML+=row;
+      row += "</tr>";
+      table.innerHTML += row;
     });
   }
 
   function editCell(key){
-    let data=JSON.parse(localStorage.getItem("schedule"))||{};
-    let novo=prompt("Disciplina:",data[key]||"");
-    if(novo===null) return;
-    data[key]=novo;
-    localStorage.setItem("schedule",JSON.stringify(data));
-    loadSchedule();
+    let data = JSON.parse(localStorage.getItem("schedule")) || {};
+    let novo = prompt("Disciplina:", data[key] || "");
+    if(novo !== null){
+      data[key] = novo.trim();
+      localStorage.setItem("schedule", JSON.stringify(data));
+      loadSchedule();
+    }
   }
 
   // ---------- TESTES ----------
   function addTest(){
-    let d=document.getElementById("disciplinaInput").value;
-    let data=document.getElementById("dataInput").value;
+    let disciplina = document.getElementById("disciplinaInput").value.trim();
+    let data = document.getElementById("dataInput").value;
+    if(!disciplina || !data){ alert("Preencha todos os campos"); return; }
 
-    let testes=JSON.parse(localStorage.getItem("testes"))||[];
-    testes.push({d,data});
-    localStorage.setItem("testes",JSON.stringify(testes));
+    let testes = JSON.parse(localStorage.getItem("testes")) || [];
+    testes.push({disciplina, data});
+    localStorage.setItem("testes", JSON.stringify(testes));
     showTests();
   }
 
   function showTests(){
-    let lista=document.getElementById("listaTestes");
-    lista.innerHTML="";
-    let testes=JSON.parse(localStorage.getItem("testes"))||[];
-
+    let lista = document.getElementById("listaTestes");
+    lista.innerHTML = "";
+    let testes = JSON.parse(localStorage.getItem("testes")) || [];
     let hoje = new Date();
 
-    testes.forEach(t=>{
+    testes.forEach((t, idx) => {
       let dataTeste = new Date(t.data);
       let diff = Math.ceil((dataTeste-hoje)/(1000*60*60*24));
-
-      let texto = diff > 0 ? diff + " dias" :
-                   diff === 0 ? "hoje" :
-                   "passado";
-
-      lista.innerHTML+=`<p>${t.d} - ${t.data} (${texto})</p>`;
+      let texto = diff > 0 ? diff + " dias" : diff === 0 ? "hoje" : "passado";
+      let p = document.createElement("p");
+      p.innerHTML = `${t.disciplina} - ${t.data} (${texto}) <button onclick="removeTest(${idx})">Remover</button>`;
+      lista.appendChild(p);
     });
   }
 
-  // ---------- VIDEOS ----------
-  function addVideo(){
-    let link=document.getElementById("videoLinkInput").value;
+  function removeTest(idx){
+    let testes = JSON.parse(localStorage.getItem("testes")) || [];
+    testes.splice(idx,1);
+    localStorage.setItem("testes", JSON.stringify(testes));
+    showTests();
+  }
 
-    let videos=JSON.parse(localStorage.getItem("videos"))||[];
+  // ---------- VÍDEOS ----------
+  function addVideo(){
+    let link = document.getElementById("videoLinkInput").value.trim();
+    if(!link){ alert("Insira um link válido"); return; }
+
+    let videos = JSON.parse(localStorage.getItem("videos")) || [];
     videos.push(link);
-    localStorage.setItem("videos",JSON.stringify(videos));
+    localStorage.setItem("videos", JSON.stringify(videos));
     showVideos();
   }
 
   function showVideos(){
-    let lista=document.getElementById("listaVideos");
-    lista.innerHTML="";
-    let videos=JSON.parse(localStorage.getItem("videos"))||[];
+    let lista = document.getElementById("listaVideos");
+    lista.innerHTML = "";
+    let videos = JSON.parse(localStorage.getItem("videos")) || [];
 
-    videos.forEach(v=>{
-      lista.innerHTML+=`<p><a href="${v}" target="_blank">Ver vídeo</a></p>`;
+    videos.forEach((v, idx) => {
+      let p = document.createElement("p");
+      p.innerHTML = `<a href="${v}" target="_blank">Ver vídeo</a> <button onclick="removeVideo(${idx})">Remover</button>`;
+      lista.appendChild(p);
     });
   }
 
-  // ---------- IA ----------
-  async function analyzeImage() {
-    const files = document.getElementById("imageInput").files;
-    const out = document.getElementById("iaOutput");
+  function removeVideo(idx){
+    let videos = JSON.parse(localStorage.getItem("videos")) || [];
+    videos.splice(idx,1);
+    localStorage.setItem("videos", JSON.stringify(videos));
+    showVideos();
+  }
 
-    if(files.length === 0){
-      out.innerText = "Escolhe uma imagem.";
-      return;
-    }
+  // ---------- IA ----------
+  function limparTexto(texto){
+    return texto.replace(/[^a-zA-ZÀ-ÿ0-9.,!? \n]/g," ")
+                .replace(/\s+/g," ")
+                .replace(/([a-z])([A-Z])/g,"$1 $2")
+                .trim();
+  }
+
+  function gerarResumo(texto){
+    let frases = texto.split(/[.!?]/);
+    return frases.slice(0,3).join(". ") + ".";
+  }
+
+  function gerarPerguntas(){
+    return `
+- Qual é o tema principal?
+- Resume o conteúdo.
+- Explica por palavras tuas.
+`;
+  }
+
+  async function analyzeImage(){
+    let files = document.getElementById("imageInput").files;
+    let out = document.getElementById("iaOutput");
+    if(files.length === 0){ out.innerText = "Escolhe uma imagem."; return; }
 
     out.innerText = "🔍 A analisar...";
+    let resultados = "";
 
-    for(let i = 0; i < files.length; i++){
-      const file = files[i];
+    for(let i=0; i<files.length; i++){
+      let file = files[i];
 
       // OCR
-      const ocr = await Tesseract.recognize(file, 'por+eng');
-      const textoExtraido = ocr.data.text;
+      let ocr = await Tesseract.recognize(file, 'por+eng', {logger:m=>console.log(m)});
+      let textoLimpo = limparTexto(ocr.data.text);
 
-      // IA gera resumo e perguntas
-      const resultado = await pipe(textoExtraido, { max_length: 200 });
+      // Resumo + perguntas
+      let resumo = gerarResumo(textoLimpo);
+      let perguntas = gerarPerguntas();
 
-      out.innerText += `
-📸 IMAGEM ${i + 1}
+      // GPT-2 (IA avançada)
+      let respostaGPT = "";
+      try{
+        respostaGPT = (await window.gptPipeline(textoLimpo, {max_length:200}))[0].generated_text;
+      }catch(e){ respostaGPT = "Erro ao gerar resposta GPT."; }
+
+      resultados += `
+📸 IMAGEM ${i+1}
 
 📖 TEXTO:
-${textoExtraido.substring(0,300)}...
+${textoLimpo.substring(0,300)}...
 
-🧠 RESPOSTA da IA:
-${resultado[0].generated_text}
+🧠 RESUMO:
+${resumo}
+
+❓ PERGUNTAS:
+${perguntas}
+
+💡 RESPOSTA da IA:
+${respostaGPT}
 
 ---------------------
 `;
     }
+
+    out.innerText = resultados;
   }
 
   // ---------- INIT ----------
   loadSchedule();
   showTests();
   showVideos();
-
 </script>
+
 </body>
 </html>
