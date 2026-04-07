@@ -4,26 +4,7 @@
   <title>StudyHub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      background: black;
-      color: white;
-      font-family: Arial;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .glow {
-      position: fixed;
-      width: 200px;
-      height: 200px;
-      background: white;
-      filter: blur(120px);
-      opacity: 0.2;
-      top: 20%;
-      left: 40%;
-      border-radius: 50%;
-      z-index: -1;
-    }
+    body { background: black; color: white; font-family: Arial; text-align: center; padding: 20px; }
 
     .card {
       background: rgba(255,255,255,0.05);
@@ -34,87 +15,109 @@
       border: 1px solid rgba(255,255,255,0.1);
     }
 
-    table {
-      width: 100%;
-      margin-top: 15px;
-      border-collapse: collapse;
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    td, th { border: 1px solid rgba(255,255,255,0.2); padding: 10px; }
 
-    td, th {
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 15px;
-    }
+    td { cursor: pointer; }
+    td:hover { background: rgba(255,255,255,0.1); }
 
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      background: transparent;
-      color: white;
-      border: 1px solid white;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: white;
-      color: black;
-    }
+    input { padding: 8px; margin: 5px; border-radius: 10px; border: none; }
+    button { padding: 10px; margin: 5px; border-radius: 10px; border: 1px solid white; background: transparent; color: white; cursor: pointer; }
   </style>
 </head>
 
 <body>
 
-<div class="glow"></div>
-
 <h1>StudyHub</h1>
 <p>Organiza. Estuda. Evolui.</p>
 
+<!-- HORÁRIO COMPLETO -->
 <div class="card">
-  <h2>Horário Semanal</h2>
+  <h2>Horário</h2>
+  <table id="schedule"></table>
+</div>
 
-  <table id="scheduleTable">
-    <tr>
-      <th>Segunda</th>
-      <th>Terça</th>
-      <th>Quarta</th>
-      <th>Quinta</th>
-      <th>Sexta</th>
-    </tr>
-    <tr id="scheduleRow"></tr>
-  </table>
-
-  <button onclick="editSchedule()">Editar Horário</button>
+<!-- TESTES -->
+<div class="card">
+  <h2>Testes</h2>
+  <input id="disciplina" placeholder="Disciplina">
+  <input id="data" type="date">
+  <button onclick="addTest()">Adicionar</button>
+  <div id="listaTestes"></div>
 </div>
 
 <script>
-  function loadSchedule() {
-    let data = JSON.parse(localStorage.getItem("simpleSchedule")) || ["", "", "", "", ""];
-    const row = document.getElementById("scheduleRow");
+const dias = ["Hora","Seg","Ter","Qua","Qui","Sex"];
+const horas = ["08h","09h","10h","11h","12h","14h","15h","16h"];
 
-    row.innerHTML = "";
+function loadSchedule(){
+  let data = JSON.parse(localStorage.getItem("schedule")) || {};
+  let table = document.getElementById("schedule");
+  table.innerHTML = "";
 
-    data.forEach(d => {
-      row.innerHTML += `<td>${d}</td>`;
-    });
-  }
+  let header = "<tr>";
+  dias.forEach(d=> header += `<th>${d}</th>`);
+  header += "</tr>";
+  table.innerHTML += header;
 
-  function editSchedule() {
-    let data = JSON.parse(localStorage.getItem("simpleSchedule")) || ["", "", "", "", ""];
-
-    const dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"];
-
-    for (let i = 0; i < dias.length; i++) {
-      let novo = prompt(`Disciplina para ${dias[i]}:`, data[i]);
-      if (novo !== null) {
-        data[i] = novo;
-      }
+  horas.forEach(h=>{
+    let row = `<tr><th>${h}</th>`;
+    for(let i=1;i<dias.length;i++){
+      let key = h+"-"+dias[i];
+      let val = data[key] || "";
+      row += `<td onclick="editCell('${key}')">${val}</td>`;
     }
+    row += "</tr>";
+    table.innerHTML += row;
+  });
+}
 
-    localStorage.setItem("simpleSchedule", JSON.stringify(data));
-    loadSchedule();
-  }
-
+function editCell(key){
+  let data = JSON.parse(localStorage.getItem("schedule")) || {};
+  let novo = prompt("Disciplina:", data[key] || "");
+  if(novo===null) return;
+  data[key] = novo;
+  localStorage.setItem("schedule", JSON.stringify(data));
   loadSchedule();
+}
+
+// TESTES
+function addTest(){
+  let d = document.getElementById("disciplina").value;
+  let data = document.getElementById("data").value;
+  if(!d || !data) return;
+
+  let testes = JSON.parse(localStorage.getItem("testes")) || [];
+  testes.push({d,data});
+  localStorage.setItem("testes", JSON.stringify(testes));
+  showTests();
+}
+
+function deleteTest(i){
+  let testes = JSON.parse(localStorage.getItem("testes")) || [];
+  testes.splice(i,1);
+  localStorage.setItem("testes", JSON.stringify(testes));
+  showTests();
+}
+
+function showTests(){
+  let lista = document.getElementById("listaTestes");
+  lista.innerHTML = "";
+  let testes = JSON.parse(localStorage.getItem("testes")) || [];
+
+  let hoje = new Date();
+
+  testes.forEach((t,i)=>{
+    let dataTeste = new Date(t.data);
+    let diff = Math.ceil((dataTeste-hoje)/(1000*60*60*24));
+    let texto = diff>=0 ? diff+" dias" : "passado";
+
+    lista.innerHTML += `<p>${t.d} - ${t.data} (${texto}) <button onclick="deleteTest(${i})">❌</button></p>`;
+  });
+}
+
+loadSchedule();
+showTests();
 </script>
 
 </body>
