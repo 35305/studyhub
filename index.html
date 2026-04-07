@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <title>StudyHub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -192,16 +193,50 @@ function showVideos(){
 
 // IA (simulada)
 function analyzeImage(){
-  let file=document.getElementById("imageInput").files[0];
-  let out=document.getElementById("iaOutput");
+  let files = document.getElementById("imageInput").files;
+  let out = document.getElementById("iaOutput");
 
-  if(!file){ out.innerText="Escolhe imagem"; return; }
+  if(files.length === 0){
+    out.innerText = "Escolhe uma imagem.";
+    return;
+  }
 
-  out.innerText="A analisar...";
+  out.innerText = "🔍 A analisar imagem...";
 
-  setTimeout(()=>{
-    out.innerText="Resumo: conteúdo identificado (simulação)";
-  },1500);
+  let resultados = "";
+
+  Array.from(files).forEach((file, index) => {
+
+    Tesseract.recognize(file, 'por+eng')
+    .then(({ data: { text } }) => {
+
+      let textoLimpo = limparTexto(text);
+      let resumo = gerarResumo(textoLimpo);
+      let perguntas = gerarPerguntas(textoLimpo);
+
+      resultados += `
+📸 IMAGEM ${index + 1}
+
+📖 TEXTO:
+${textoLimpo.substring(0,300)}...
+
+🧠 RESUMO:
+${resumo}
+
+❓ PERGUNTAS:
+${perguntas}
+
+-------------------------
+`;
+
+      out.innerText = resultados;
+
+    })
+    .catch(() => {
+      out.innerText = "Erro ao analisar imagem.";
+    });
+
+  });
 }
 
 loadSchedule();
