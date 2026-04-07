@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <title>StudyHub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -68,7 +67,7 @@
 <!-- HOME -->
 <div id="home" class="section active">
   <h1>Bem-vindo ao StudyHub</h1>
-  <p>Disciplina constrói caminhos, organização abre portas e o estudo transforma quem tu escolhes ser todos os dias.</p>
+  <p>Organiza. Estuda. Evolui.</p>
 </div>
 
 <!-- HORÁRIO -->
@@ -112,7 +111,7 @@ function showSection(id){
 
 // HORÁRIO
 const dias=["Hora","Seg","Ter","Qua","Qui","Sex"];
-const horas=["08:20 - 09:10","09:15 - 10:5","10:20 - 11:10","11:20 - 12:10","12:15 - 13:05","13:05 - 14:15","14:15 - 15:05","15:20 - 16:10","16:20 - 17:10","17:15 - 18:05"];
+const horas=["08h","09h","10h","11h","12h","13h","14h","15h","16h","17h","18h"];
 
 function loadSchedule(){
   let data=JSON.parse(localStorage.getItem("schedule"))||{};
@@ -193,51 +192,16 @@ function showVideos(){
 
 // IA (simulada)
 function analyzeImage(){
-  let file = document.getElementById("imageInput").files[0];
-  let out = document.getElementById("iaOutput");
+  let file=document.getElementById("imageInput").files[0];
+  let out=document.getElementById("iaOutput");
 
-  if(!file){
-    out.innerText = "Escolhe uma imagem primeiro.";
-    return;
-  }
+  if(!file){ out.innerText="Escolhe imagem"; return; }
 
-  out.innerText = "🔍 A analisar imagem...";
+  out.innerText="A analisar...";
 
-  Tesseract.recognize(
-    file,
-    'por+eng'
-  ).then(({ data: { text } }) => {
-
-    // TEXTO EXTRAÍDO
-    let resumo = gerarResumo(text);
-    let perguntas = gerarPerguntas(text);
-
-    out.innerText = `
-📖 TEXTO:
-${text.substring(0, 300)}...
-
-🧠 RESUMO:
-${resumo}
-
-❓ PERGUNTAS:
-${perguntas}
-    `;
-
-  }).catch(err => {
-    out.innerText = "Erro ao analisar imagem.";
-  });
-}
-  function gerarResumo(texto){
-  let frases = texto.split(".");
-  return frases.slice(0,3).join(".") + ".";
-}
-
-function gerarPerguntas(texto){
-  return `
-- Qual é o tema principal?
-- O que aprendeste neste conteúdo?
-- Explica este tema por palavras tuas.
-  `;
+  setTimeout(()=>{
+    out.innerText="Resumo: conteúdo identificado (simulação)";
+  },1500);
 }
 
 loadSchedule();
