@@ -239,17 +239,48 @@
 
   // ---------- IA ----------
   function limparTexto(texto){
-    return texto.replace(/[^a-zA-ZÀ-ÿ0-9.,!? \n]/g," ")
-                .replace(/\s+/g," ")
-                .replace(/([a-z])([A-Z])/g,"$1 $2")
-                .trim();
+  return texto
+    // remove lixo estranho
+    .replace(/[^a-zA-ZÀ-ÿ0-9.,!? \n]/g, " ")
+
+    // remove letras isoladas (tipo "a i o r")
+    .replace(/\b[a-zA-Z]\b/g, "")
+
+    // remove sequências estranhas tipo "aaa", "zzz"
+    .replace(/([a-zA-Z])\1{2,}/g, "$1")
+
+    // remove palavras com números misturados
+    .replace(/\b\w*\d\w*\b/g, "")
+
+    // remove espaços repetidos
+    .replace(/\s+/g, " ")
+
+    // remove linhas muito curtas (lixo)
+    .split("\n")
+    .filter(l => l.trim().length > 20)
+    .join("\n")
+
+    .trim();
+}
+
   }
 
   function gerarResumo(texto){
     let frases = texto.split(/[.!?]/);
     return frases.slice(0,3).join(". ") + ".";
   }
+if(!textoValido(textoLimpo)){
+  resultados += `
+📸 IMAGEM ${i+1}
 
+⚠️ Texto ilegível ou de baixa qualidade.
+Tente tirar uma foto melhor.
+
+---------------------
+`;
+  continue;
+}
+  
   function gerarPerguntas(){
     return `
 - Qual é o tema principal?
@@ -257,6 +288,11 @@
 - Explica por palavras tuas.
 `;
   }
+  function textoValido(texto){
+  let palavras = texto.split(" ");
+  let boas = palavras.filter(p => p.length > 2);
+  return boas.length > 20;
+}
 
   async function analyzeImage(){
     let files = document.getElementById("imageInput").files;
@@ -272,6 +308,17 @@
       // OCR
       let ocr = await Tesseract.recognize(file, 'por+eng', {logger:m=>console.log(m)});
       let textoLimpo = limparTexto(ocr.data.text);
+      if(!textoValido(textoLimpo)){
+  resultados += `
+📸 IMAGEM ${i+1}
+
+⚠️ Texto ilegível ou de baixa qualidade.
+Tenta tirar uma foto melhor.
+
+---------------------
+`;
+  continue;
+}
 
       // Resumo + perguntas
       let resumo = gerarResumo(textoLimpo);
